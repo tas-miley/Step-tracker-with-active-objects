@@ -6,7 +6,7 @@
 #define MAX_EVENTS 4
 
 typedef enum {
-    IMU_EVENT = 0,
+    IMU_INIT_EVT = 0,
     IMU_EVENT_2,
     BLE_EVENT,
     BLE_EVENT_2

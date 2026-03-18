@@ -3,6 +3,7 @@
 #include <zephyr/logging/log.h>
 #include "active_object.h"
 #include "ao_events.h"
+#include "lsm6dso_shim.h"
 
 typedef enum {
     IMU_IDLE = 1,
