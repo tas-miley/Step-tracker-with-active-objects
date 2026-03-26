@@ -74,6 +74,7 @@ void ble_ao_init(void) {
     ao_subscribe(&ble_ao.ao, BLE_START_ADVERTISING_EVT);
     ao_subscribe(&ble_ao.ao, BLE_CONNECTED_EVT);
     ao_subscribe(&ble_ao.ao, BLE_DISCONNECTED_EVT);
+    ao_subscribe(&ble_ao.ao, IMU_DATA_READY);
 
     ble_ao.state = BLE_UNINITIALIZED_STATE;
     LOG_INF("After initial setting of state %d", ble_ao.state);
@@ -137,6 +138,11 @@ void ble_ao_dispatch(void *self, ao_event const *evt) {
                         return;
                     }
                     ao->state = BLE_ADVERTISING_STATE;
+                    break;
+                case IMU_DATA_READY:
+                    if (current_conn) {
+                        ble_pedometer_notify(current_conn, evt->data, 0);
+                    }
                     break;
                 default:
                     LOG_ERR("Unrecognized event in BLE_CONNECTED_STATE state. Event id: %d", evt->id);

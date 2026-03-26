@@ -8,6 +8,6 @@ int main(void)
 {
     LOG_DBG("Initializing from main.");
     ble_ao_init();
-    // imu_ao_init();
+    imu_ao_init();
 	return 0;
 }

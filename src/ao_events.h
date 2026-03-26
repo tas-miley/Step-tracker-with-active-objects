@@ -7,7 +7,7 @@
 
 typedef enum {
     IMU_INIT_EVT = 0,
-    IMU_EVENT_2,
+    IMU_DATA_READY,
     BLE_INIT_EVT,
     BLE_START_ADVERTISING_EVT,
     BLE_CONNECTED_EVT,

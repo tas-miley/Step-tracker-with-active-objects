@@ -95,10 +95,10 @@ void pedometer_init(void) {
         LOG_ERR("Failed to set the embedded sens.");
     }
 
-    while (1) {
-        /* Read steps */
-        lsm6dso_number_of_steps_get(&dev_ctx, &steps);
-        LOG_INF("Steps: %d", steps);
-        k_msleep(1000);
-    }
+    // while (1) {
+    //     /* Read steps */
+    //     lsm6dso_number_of_steps_get(&dev_ctx, &steps);
+    //     LOG_INF("Steps: %d", steps);
+    //     k_msleep(1000);
+    // }
 }

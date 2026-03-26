@@ -12,14 +12,14 @@ static uint8_t queue_buf[sizeof(ao_event) * MAX_QUEUE_MSGS];
 
 void imu_ao_init(void) {
     LOG_INF("Initializing IMU AO.");
-    k_msleep(1000);
-    active_object_init(&imu_ao.ao, &imu_ao_dispatch, IMU_AO_THREAD_PRIO, (k_thread_stack_t*)&imu_stack, K_THREAD_STACK_SIZEOF(imu_stack), queue_buf, sizeof(ao_event), 1);
-    k_thread_name_set(&imu_ao.ao.thread, "imu_ao");
 
     ao_subscribe(&imu_ao.ao, IMU_INIT_EVT);
     imu_ao.state = IMU_IDLE;
-    ao_publish(&(ao_event) { .id = IMU_INIT_EVT, .data = 1 });
 
+    active_object_init(&imu_ao.ao, &imu_ao_dispatch, IMU_AO_THREAD_PRIO, (k_thread_stack_t*)&imu_stack, K_THREAD_STACK_SIZEOF(imu_stack), queue_buf, sizeof(ao_event), 1);
+    k_thread_name_set(&imu_ao.ao.thread, "imu_ao");
+
+    ao_publish(&(ao_event) { .id = IMU_INIT_EVT, .data = 1 });
 }
 
 
@@ -33,10 +33,15 @@ void imu_ao_dispatch(void *self, ao_event const *evt) {
                 case IMU_INIT_EVT:
                     LOG_INF("TRying to call pedometer init");
                     pedometer_init();
-                    k_msleep(1000);
-                    // ao->state = IMU_EVENT_2;
+                    int count = 0;
+                    while (1) {
+                        LOG_INF("Publishing data ready");
+                        ao_publish(&(ao_event){ .id = IMU_DATA_READY, .data = count});
+                        count++;
+                        k_msleep(1000);
+                    }
                     break;
-                case IMU_EVENT_2:
+                case IMU_DATA_READY:
                     LOG_INF("IMU EVENT 2.");
                     k_msleep(1000);
                     break;
