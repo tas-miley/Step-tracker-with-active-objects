@@ -9,12 +9,9 @@ void thread_entry(void *p1, void *p2, void *p3) {
     active_object *ao = (active_object *) p1;
     ao_event evt;
     while (1) {
-        LOG_DBG("Inside of %s AO thread.", k_thread_name_get(k_current_get()));
-        k_msleep(1000);
         k_msgq_get(&ao->queue, &evt, K_FOREVER);
-        k_msleep(1000);
+        LOG_DBG("Message rec'd on %s AO thread. Evt ID: %d", k_thread_name_get(k_current_get()), evt.id);
         ao->dispatch(ao, &evt);
-        // k_msleep(1000);
     }
 }
 
