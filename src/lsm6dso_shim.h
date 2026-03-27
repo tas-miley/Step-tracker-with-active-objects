@@ -6,3 +6,4 @@
 #include <zephyr/logging/log.h>
 
 void pedometer_init(void);
+int read_step_counter(void);

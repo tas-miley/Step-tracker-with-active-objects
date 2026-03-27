@@ -32,4 +32,4 @@ void active_object_init(active_object *self,
                         size_t queue_msg_size,
                         int id);
 
-void ao_post(active_object *self, ao_event *evt);
+void ao_post(active_object *self, const ao_event *evt);

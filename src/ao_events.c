@@ -25,7 +25,7 @@ void ao_unsubscribe(active_object *self, ao_event_id evt_id) {
     }
 }
 
-void ao_publish(ao_event *evt) {
+void ao_publish(const ao_event *evt) {
     int cnt = sub_count[evt->id];
     for (int i = 0; i < cnt; i++) {
         ao_post(subscriptions[evt->id][i], evt);

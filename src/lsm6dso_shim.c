@@ -36,6 +36,7 @@ https://github.com/STMicroelectronics/STMems_Standard_C_drivers/blob/master/lsm6
 */
 void pedometer_init(void) {
     lsm6dso_emb_sens_t emb_sens;
+    lsm6dso_pin_int1_route_t int1_route;
 
     LOG_INF("Inside of pedometer init");
     if (!i2c_is_ready_dt(&i2c_handle)) {
@@ -74,6 +75,11 @@ void pedometer_init(void) {
         LOG_ERR("Failed to enable block data update.");
     }
     
+    lsm6dso_int_notification_set(&dev_ctx, LSM6DSO_ALL_INT_LATCHED);
+    lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
+    int1_route.step_detector = PROPERTY_ENABLE;
+    lsm6dso_pin_int1_route_set(&dev_ctx, int1_route);
+
     err = lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_26Hz);
     if (err != 0) {
         LOG_ERR("Failed to enable xl sensor.");
@@ -94,11 +100,19 @@ void pedometer_init(void) {
     if (err != 0) {
         LOG_ERR("Failed to set the embedded sens.");
     }
+}
 
-    // while (1) {
-    //     /* Read steps */
-    //     lsm6dso_number_of_steps_get(&dev_ctx, &steps);
-    //     LOG_INF("Steps: %d", steps);
-    //     k_msleep(1000);
-    // }
+int read_step_counter(void) {
+    uint8_t val = 0;
+    int err = lsm6dso_pedo_step_detect_get(&dev_ctx, &val);
+    if (err < 0) {
+        LOG_ERR("Failed to fetch & clear INT1 status. Error %d", err);
+        return err;
+    }
+    err = lsm6dso_number_of_steps_get(&dev_ctx, &steps);
+    if (err < 0) {
+        LOG_ERR("Failed to read number of steps. Error %d", err);
+        return err;
+    }
+    return steps;
 }

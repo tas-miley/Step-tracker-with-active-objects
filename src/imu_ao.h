@@ -1,5 +1,6 @@
 #pragma once
 
+#include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
 #include "active_object.h"
 #include "ao_events.h"

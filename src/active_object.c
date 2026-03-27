@@ -23,7 +23,7 @@ void active_object_init(active_object *self, dispatch_func dispatch, int thread_
     self->id = id;
 }
 
-void ao_post(active_object *self, ao_event *evt) {
+void ao_post(active_object *self, const ao_event *evt) {
     int ret = k_msgq_put(&self->queue, evt, K_NO_WAIT);
     if (ret != 0) {
         LOG_ERR("Failed to put message for object %s", k_thread_name_get(k_current_get()));

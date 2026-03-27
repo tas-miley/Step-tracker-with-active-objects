@@ -74,7 +74,7 @@ void ble_ao_init(void) {
     ao_subscribe(&ble_ao.ao, BLE_START_ADVERTISING_EVT);
     ao_subscribe(&ble_ao.ao, BLE_CONNECTED_EVT);
     ao_subscribe(&ble_ao.ao, BLE_DISCONNECTED_EVT);
-    ao_subscribe(&ble_ao.ao, IMU_DATA_READY);
+    ao_subscribe(&ble_ao.ao, BLE_DATA_READY);
 
     ble_ao.state = BLE_UNINITIALIZED_STATE;
     LOG_INF("After initial setting of state %d", ble_ao.state);
@@ -82,7 +82,7 @@ void ble_ao_init(void) {
     active_object_init(&ble_ao.ao, &ble_ao_dispatch, BLE_AO_THREAD_PRIO, (k_thread_stack_t*)&ble_stack, K_THREAD_STACK_SIZEOF(ble_stack), queue_buf, sizeof(ao_event), 1);
     k_thread_name_set(&ble_ao.ao.thread, "ble_ao");
 
-    ao_publish(&(ao_event) { .id = BLE_INIT_EVT, .data = 1 });
+    ao_publish(&(const ao_event) { .id = BLE_INIT_EVT, .data = 1 });
 }
 
 
@@ -139,7 +139,7 @@ void ble_ao_dispatch(void *self, ao_event const *evt) {
                     }
                     ao->state = BLE_ADVERTISING_STATE;
                     break;
-                case IMU_DATA_READY:
+                case BLE_DATA_READY:
                     if (current_conn) {
                         ble_pedometer_notify(current_conn, evt->data, 0);
                     }

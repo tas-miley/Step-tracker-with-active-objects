@@ -3,7 +3,7 @@
 #include "active_object.h"
 
 #define MAX_SUBSCRIPTIONS 10
-#define MAX_EVENTS 6
+#define MAX_EVENTS 7
 
 typedef enum {
     IMU_INIT_EVT = 0,
@@ -11,7 +11,8 @@ typedef enum {
     BLE_INIT_EVT,
     BLE_START_ADVERTISING_EVT,
     BLE_CONNECTED_EVT,
-    BLE_DISCONNECTED_EVT
+    BLE_DISCONNECTED_EVT,
+    BLE_DATA_READY
 } ao_event_id;
 
 typedef struct ao_subscription {
@@ -21,4 +22,4 @@ typedef struct ao_subscription {
 
 void ao_subscribe(active_object *self, ao_event_id evt_id);
 void ao_unsubscribe(active_object *self, ao_event_id evt_id);
-void ao_publish(ao_event *evt_id);
+void ao_publish(const ao_event *evt_id);
