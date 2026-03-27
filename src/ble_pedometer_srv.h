@@ -9,7 +9,7 @@
 // #include <zephyr/bluetooth/services/bas.h>
 // #include <zephyr/bluetooth/services/hrs.h>
 #include <zephyr/logging/log.h>
-
+#include <zephyr/sys/atomic.h>
 
 // service UUID
 #define BT_UUID_PEDOMETER_VALUE BT_UUID_128_ENCODE(0x7387ecd8, 0x012b, 0x4e95, 0x93b9, 0x995d1244b057)
@@ -25,3 +25,5 @@
 #define BT_UUID_CADENCE             BT_UUID_DECLARE_128(BT_UUID_CADENCE_VALUE)
 
 void ble_pedometer_notify(struct bt_conn *conn, uint32_t steps, uint16_t cadence);
+void update_steps(uint32_t steps);
+void update_cadence(uint32_t cadence);
