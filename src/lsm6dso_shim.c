@@ -34,21 +34,27 @@ static uint16_t steps;
 This initial spool up of the pedometer is derived from the example from ST.
 https://github.com/STMicroelectronics/STMems_Standard_C_drivers/blob/master/lsm6dso_STdC/examples/lsm6dso_pedometer.c
 */
-void pedometer_init(void) {
+int pedometer_init(void) {
     lsm6dso_emb_sens_t emb_sens;
     lsm6dso_pin_int1_route_t int1_route;
 
     LOG_INF("Inside of pedometer init");
     if (!i2c_is_ready_dt(&i2c_handle)) {
         LOG_ERR("I2C bus not ready.");
+        return -ENODEV;
     }
 
     k_msleep(10); // sleep initial
 
-    lsm6dso_device_id_get(&dev_ctx, &whoamI);
+    err = lsm6dso_device_id_get(&dev_ctx, &whoamI);
+    if (err != 0) {
+        LOG_ERR("Failed to get IMU ID. Error %d", err);
+        return err;
+    }
 
     if (whoamI != LSM6DSO_ID) {
         LOG_ERR("WHOAMI, %d, is not equal to %d", whoamI, LSM6DSO_ID);
+        return -ENODEV;
     } 
     else {
         LOG_INF("WHOAMI, %d, is equal to %d", whoamI, LSM6DSO_ID);
@@ -62,44 +68,68 @@ void pedometer_init(void) {
     /* Disable I3C interface */
     err = lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
     if (err != 0) {
-        LOG_ERR("Failed to disable i3c interface.");
+        LOG_ERR("Failed to disable i3c interface. Error: %d", err);
+        return err;
     }
     /* Set XL full scale */
     err = lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
     if (err != 0) {
-        LOG_ERR("Failed to set XL full scale.");
+        LOG_ERR("Failed to set XL full scale. Error: %d", err);
+        return err;
     }
     /* Enable Block Data Update */
     err = lsm6dso_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
     if (err != 0) {
-        LOG_ERR("Failed to enable block data update.");
+        LOG_ERR("Failed to enable block data update. Error: %d", err);
+        return err;
     }
     
-    lsm6dso_int_notification_set(&dev_ctx, LSM6DSO_ALL_INT_LATCHED);
+    /* Configure INT1 to Latch */
+    err = lsm6dso_int_notification_set(&dev_ctx, LSM6DSO_ALL_INT_LATCHED);
+    if (err != 0) {
+        LOG_ERR("Failed to set INT1 Notification to latched. Error: %d", err);
+        return err;
+    }
+    /* Get INT1 route */
     lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
+    if (err != 0) {
+        LOG_ERR("Failed to get the INT1 route. Error: %d", err);
+        return err;
+    }
     int1_route.step_detector = PROPERTY_ENABLE;
+    /* Set INT1 route to step detector */
     lsm6dso_pin_int1_route_set(&dev_ctx, int1_route);
+    if (err != 0) {
+        LOG_ERR("Failed to set the INT1 route. Error: %d", err);
+        return err;
+    }
 
+    /* Set Data Rate */
     err = lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_26Hz);
     if (err != 0) {
-        LOG_ERR("Failed to enable xl sensor.");
+        LOG_ERR("Failed to enable xl sensor. Error: %d", err);
+        return err;
     }
     /* Reset steps of pedometer */
     err = lsm6dso_steps_reset(&dev_ctx);
     if (err != 0) {
-        LOG_ERR("Failed to reset the steps on the pedometer.");
+        LOG_ERR("Failed to reset the steps on the pedometer. Error: %d", err);
+        return err;
     }
     /* Enable pedometer */
     err = lsm6dso_pedo_sens_set(&dev_ctx, LSM6DSO_FALSE_STEP_REJ_ADV_MODE);
     if (err != 0) {
-        LOG_ERR("Failed to enable the pedometer.");
+        LOG_ERR("Failed to enable the pedometer. Error: %d", err);
+        return err;
     }
     emb_sens.step = PROPERTY_ENABLE;
     emb_sens.step_adv = PROPERTY_ENABLE;
     err = lsm6dso_embedded_sens_set(&dev_ctx, &emb_sens);
     if (err != 0) {
-        LOG_ERR("Failed to set the embedded sens.");
+        LOG_ERR("Failed to set the embedded sens. Error: %d", err);
+        return err;
     }
+    return 0;
 }
 
 int read_step_counter(void) {

@@ -7,8 +7,8 @@
 #include "lsm6dso_shim.h"
 
 typedef enum {
-    IMU_IDLE = 1,
-    IMU_FETCH,
+    IMU_INIT = 1,
+    IMU_ACQUIRE,
 } imu_state;
 
 typedef struct imu_active_object {

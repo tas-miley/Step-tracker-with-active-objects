@@ -45,7 +45,7 @@ void imu_ao_init(void) {
 
     ao_subscribe(&imu_ao.ao, IMU_INIT_EVT);
     ao_subscribe(&imu_ao.ao, IMU_DATA_READY);
-    imu_ao.state = IMU_IDLE;
+    imu_ao.state = IMU_INIT;
 
     active_object_init(&imu_ao.ao, &imu_ao_dispatch, IMU_AO_THREAD_PRIO, (k_thread_stack_t*)&imu_stack, K_THREAD_STACK_SIZEOF(imu_stack), queue_buf, sizeof(ao_event), 1);
     k_thread_name_set(&imu_ao.ao.thread, "imu_ao");
@@ -59,7 +59,7 @@ void imu_ao_dispatch(void *self, ao_event const *evt) {
     LOG_INF("imu state: %d", ao->state);
     int err = 0;
     switch(ao->state) {
-        case IMU_IDLE:
+        case IMU_INIT:
             switch (evt->id) {
                 case IMU_INIT_EVT:
                     LOG_INF("Initializing IMU.");
@@ -68,8 +68,20 @@ void imu_ao_dispatch(void *self, ao_event const *evt) {
                         LOG_ERR("Failed to initialize INT1");
                         return;
                     }
-                    pedometer_init();
+                    err = pedometer_init();
+                    if (err < 0) {
+                        LOG_ERR("Failed to initialize INT1");
+                        return;
+                    }
+                    ao->state = IMU_ACQUIRE;
                     break;
+                default:
+                    // LOG_INF("Unrecognized event. Not doing anything.");
+                    break;
+            }
+            break;
+        case IMU_ACQUIRE:
+            switch (evt->id) {
                 case IMU_DATA_READY:
                     LOG_INF("IMU DATA READY");
                     int steps = read_step_counter();
@@ -81,11 +93,8 @@ void imu_ao_dispatch(void *self, ao_event const *evt) {
                     ao_publish(&(ao_event){ .id = BLE_DATA_READY, .data = steps});
                     break;
                 default:
-                    LOG_INF("Unrecognized event. Not doing anything.");
-                    k_msleep(1000);
+                    break;
             }
-            break;
-        case IMU_FETCH:
             break;
         default: 
             LOG_ERR("IMU AO is not in a valid state. State: %d", ao->state);
