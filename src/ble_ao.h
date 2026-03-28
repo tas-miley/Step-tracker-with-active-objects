@@ -1,6 +1,7 @@
 #pragma once
 
 #include <zephyr/logging/log.h>
+// #include <zephyr/drivers/adc.h> // used for battery voltage
 #include "active_object.h"
 #include "ao_events.h"
 #include "ble_pedometer_srv.h"

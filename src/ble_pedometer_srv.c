@@ -35,7 +35,6 @@ static ssize_t read_cadence(struct bt_conn *conn,
                              &cadence, sizeof(cadence));
 }
 
-// TODO - add in read BT_GATT_CHRC_READ & read callbacks so central can sync w this device. 
 BT_GATT_SERVICE_DEFINE(pedometer_service,
 	BT_GATT_PRIMARY_SERVICE(BT_UUID_PEDOMETER_SERVICE),
 	BT_GATT_CHARACTERISTIC(BT_UUID_STEP_COUNT,

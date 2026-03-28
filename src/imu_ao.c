@@ -56,7 +56,7 @@ void imu_ao_init(void) {
 
 void imu_ao_dispatch(void *self, ao_event const *evt) {
     imu_active_object *ao = (imu_active_object *) self;
-    LOG_INF("imu state: %d", ao->state);
+    // LOG_INF("imu state: %d", ao->state);
     int err = 0;
     switch(ao->state) {
         case IMU_INIT:

@@ -58,6 +58,11 @@ static void bt_ready_cb(int err) {
     ao_publish(&(ao_event) { .id = BLE_START_ADVERTISING_EVT, .data = 1 });
 }
 
+/* 
+TODO - ADC for Battery voltage
+*/
+
+
 /*
 Active Object
 */
@@ -109,6 +114,10 @@ void ble_ao_dispatch(void *self, ao_event const *evt) {
         case BLE_INITIALIZING_STATE:
             switch (evt->id) {
                 case BLE_START_ADVERTISING_EVT:
+                    err = bt_bas_set_battery_level(100);
+                    if (err) {
+                        LOG_ERR("BAS set error (err = %d)", err);
+                    }
                     err = start_advertising();
                     if (err < 0) {
                         LOG_ERR("Failed to start advertising. Err: %d", err);
