@@ -13,10 +13,6 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *buf, uint16_t l
     return i2c_burst_read_dt(i2c_handle, reg, buf, len);
 }
 
-void platform_init(void) {
-    // initialize zephyr's i2c dev. 
-}
-
 static const struct i2c_dt_spec i2c_handle = I2C_DT_SPEC_GET(DT_ALIAS(imu));
 
 static stmdev_ctx_t dev_ctx = {
@@ -91,21 +87,21 @@ int pedometer_init(void) {
         return err;
     }
     /* Get INT1 route */
-    lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
+    err = lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
     if (err != 0) {
         LOG_ERR("Failed to get the INT1 route. Error: %d", err);
         return err;
     }
     int1_route.step_detector = PROPERTY_ENABLE;
     /* Set INT1 route to step detector */
-    lsm6dso_pin_int1_route_set(&dev_ctx, int1_route);
+    err = lsm6dso_pin_int1_route_set(&dev_ctx, int1_route);
     if (err != 0) {
         LOG_ERR("Failed to set the INT1 route. Error: %d", err);
         return err;
     }
 
     /* Set Data Rate */
-    err = lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_26Hz);
+    err = lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_52Hz);
     if (err != 0) {
         LOG_ERR("Failed to enable xl sensor. Error: %d", err);
         return err;

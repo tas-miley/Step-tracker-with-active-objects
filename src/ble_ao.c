@@ -125,6 +125,10 @@ void ble_ao_dispatch(void *self, ao_event const *evt) {
                     }
                     ao->state = BLE_ADVERTISING_STATE;
                     break;
+                case BLE_DATA_READY:
+                    LOG_INF("Updating steps");
+                    update_steps(evt->data);
+                    break;
                 default:
                     LOG_ERR("Unrecognized event in BLE_INITIALIZING_STATE state. Event id: %d", evt->id);
             }
@@ -133,6 +137,10 @@ void ble_ao_dispatch(void *self, ao_event const *evt) {
             switch (evt->id) {
                 case BLE_CONNECTED_EVT:
                     ao->state = BLE_CONNECTED_STATE;
+                    break;
+                case BLE_DATA_READY:
+                    LOG_INF("Updating steps");
+                    update_steps(evt->data);
                     break;
                 default:
                     LOG_ERR("Unrecognized event in BLE_ADVERTISING_STATE state. Event id: %d", evt->id);
@@ -151,9 +159,6 @@ void ble_ao_dispatch(void *self, ao_event const *evt) {
                 case BLE_DATA_READY:
                     LOG_INF("Updating steps");
                     update_steps(evt->data);
-                    // if (current_conn) {
-                    //     ble_pedometer_notify(current_conn, evt->data, 0);
-                    // }
                     break;
                 default:
                     LOG_ERR("Unrecognized event in BLE_CONNECTED_STATE state. Event id: %d", evt->id);

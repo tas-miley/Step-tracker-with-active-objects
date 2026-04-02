@@ -7,14 +7,14 @@ static atomic_t cadence_spm;
 static uint32_t dummy_buf1;
 static uint32_t dummy_buf2;
 
-static bool notify_step_count;
-static bool notify_cadence;
+static atomic_t notify_step_count;
+static atomic_t notify_cadence;
 
 static void step_count_ccc_changed_cb(const struct bt_gatt_attr *attr, uint16_t value) {
-    notify_step_count = (value == BT_GATT_CCC_NOTIFY);
+    atomic_set(&notify_step_count, (value == BT_GATT_CCC_NOTIFY));
 }
 static void cadence_ccc_changed_cb(const struct bt_gatt_attr *attr, uint16_t value) {
-    notify_cadence = (value == BT_GATT_CCC_NOTIFY);
+    atomic_set(&notify_cadence, (value == BT_GATT_CCC_NOTIFY));
 }
 
 static ssize_t read_step_count(struct bt_conn *conn,
@@ -53,10 +53,11 @@ void ble_pedometer_notify(struct bt_conn *conn, uint32_t steps, uint16_t cadence
     atomic_set(&step_count, (atomic_val_t)steps);
     atomic_set(&cadence_spm, (atomic_val_t)cadence);
 
-    if (!notify_step_count || !conn) {
+    if (!(bool)atomic_get(&notify_step_count) || !conn) {
         return;
     }
-    LOG_WRN("Notifiying steps, %d", steps);
+    LOG_WRN("Notifying steps, %d", steps);
+    // attrs[2] = step count characteristic
     int err = bt_gatt_notify(conn,
                              &pedometer_service.attrs[2],
                              &steps,
@@ -64,9 +65,10 @@ void ble_pedometer_notify(struct bt_conn *conn, uint32_t steps, uint16_t cadence
     if (err) {
         LOG_WRN("Step notify failed (err %d)", err);
     }
-    if (!notify_cadence || !conn) {
+    if (!(bool)atomic_get(&notify_cadence) || !conn) {
         return;
     }
+    // attrs[5] = cadence characteristic
     err = bt_gatt_notify(conn,
                    &pedometer_service.attrs[5],
                    &cadence,
@@ -76,6 +78,7 @@ void ble_pedometer_notify(struct bt_conn *conn, uint32_t steps, uint16_t cadence
     }
 }
 
+// keep steps up to date, regardless of whether we are notifying or not.
 void update_steps(uint32_t steps) {
     atomic_set(&step_count, (atomic_val_t)steps);
 }

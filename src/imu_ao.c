@@ -76,7 +76,6 @@ void imu_ao_dispatch(void *self, ao_event const *evt) {
                     ao->state = IMU_ACQUIRE;
                     break;
                 default:
-                    // LOG_INF("Unrecognized event. Not doing anything.");
                     break;
             }
             break;
