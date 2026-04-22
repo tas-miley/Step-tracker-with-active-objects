@@ -14,6 +14,7 @@ target_sources(app PRIVATE src/main.c
     src/imu_ao.h src/imu_ao.c
     src/lsm6dso_shim.h src/lsm6dso_shim.c
     src/ble_pedometer_srv.h src/ble_pedometer_srv.c
+    src/hrm_ao.h src/hrm_ao.c
 )
 
 target_include_directories(app PRIVATE

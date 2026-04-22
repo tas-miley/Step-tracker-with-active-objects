@@ -2,7 +2,6 @@
 
 LOG_MODULE_REGISTER(lsm6dso_shim, LOG_LEVEL_DBG);
 
-
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *buf, uint16_t len) {
     const struct i2c_dt_spec *i2c_handle = (const struct i2c_dt_spec *) handle;
     return i2c_burst_write_dt(i2c_handle, reg, buf, len);
