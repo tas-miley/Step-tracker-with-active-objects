@@ -41,6 +41,22 @@ int init_int_isr(void) {
     return 0;
 }
 
+static struct i2c_dt_spec max30102_dev = {
+    .bus = DEVICE_DT_GET(DT_NODELABEL(i2c0)),
+    .addr = 0x57
+};
+
+void hrm_i2c_init(void) {
+    if (!i2c_is_ready_dt(&max30102_dev)) {
+        LOG_ERR("Max30102 I2C not ready");
+        return;
+    }
+    uint8_t buf = 0xFF;
+    uint8_t tx = 0xFF;
+    i2c_write_read_dt(&max30102_dev, &tx, 1, &buf, 1);
+    LOG_INF("Max30102 part name 0x%02x", buf);
+}
+
 void hrm_ao_init(void) {
     LOG_INF("Initializing HRM AO.");
 
@@ -57,14 +73,14 @@ void hrm_ao_init(void) {
 
 void hrm_ao_dispatch(void *self, ao_event const *evt) {
     hrm_active_object *ao = (hrm_active_object *) self;
-    // LOG_INF("hrm state: %d", ao->state);
     int err = 0;
     switch(ao->state) {
         case HRM_INIT:
             switch (evt->id) {
                 case HRM_INIT_EVT:
                     LOG_INF("Initializing HRM.");
-                    err = init_int_isr();
+                    hrm_i2c_init();
+                    // err = init_int_isr();
                     if (err < 0) {
                         LOG_ERR("Failed to initialize INT1");
                         return;

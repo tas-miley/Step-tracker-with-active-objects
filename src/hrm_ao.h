@@ -2,6 +2,7 @@
 
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/drivers/i2c.h>
 #include "active_object.h"
 #include "ao_events.h"
 
@@ -19,3 +20,4 @@ typedef struct hrm_active_object {
 
 void hrm_ao_init(void);
 void hrm_ao_dispatch(void *self, ao_event const *evt);
+void hrm_i2c_init(void);
