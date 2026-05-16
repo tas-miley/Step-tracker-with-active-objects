@@ -1,6 +1,7 @@
 #include <zephyr/kernel.h>
 #include "ble_ao.h"
 #include "imu_ao.h"
+#include "hrm_ao.h"
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
