@@ -4,6 +4,8 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/i2c.h>
 
+#include "ao_events.h"
+
 #define MAX30102_REG_INTERRUPT_STATUS_1          0x00        /**< interrupt status 1 register */
 #define MAX30102_REG_INTERRUPT_STATUS_2          0x01        /**< interrupt status 2 register */
 #define MAX30102_REG_INTERRUPT_ENABLE_1          0x02        /**< interrupt enable 1 register */
@@ -25,4 +27,7 @@
 #define MAX30102_REG_REVISION_ID                 0xFE        /**< revision id register */
 #define MAX30102_REG_PART_ID                     0xFF        /**< part id register */
 
+#define MAX_SAMPLES 32
+
 int max30102_init(void);
+int max30102_get_fifo(uint32_t *red, uint32_t *ir, uint8_t *count);

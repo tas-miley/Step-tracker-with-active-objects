@@ -10,36 +10,9 @@ static hrm_active_object hrm_ao;
 
 static uint8_t queue_buf[sizeof(ao_event) * MAX_QUEUE_MSGS];
 
-// TODO - change this to INT gpio for MAX30102
-static const struct gpio_dt_spec int_gpio = GPIO_DT_SPEC_GET(DT_NODELABEL(st_lsm6dso), irq_gpios);
-static struct gpio_callback int_cb;
-
-static void int_isr(const struct device *port, struct gpio_callback *cb, gpio_port_pins_t pins) {
-    static const ao_event evt = { .id = HRM_DATA_READY, .data = 0 };
-    ao_publish(&evt);
-}
-
-// set up the INT gpio
-int init_int_isr(void) {
-    int err = 0;
-    err = gpio_pin_configure_dt(&int_gpio, GPIO_INPUT);
-    if (err < 0) {
-        LOG_ERR("Error configuring INT as input. Error: %d", err);
-        return err;
-    }
-    err = gpio_pin_interrupt_configure_dt(&int_gpio, GPIO_INT_EDGE_RISING);
-    if (err < 0) {
-        LOG_ERR("Error configuring interrupt. Error: %d", err);
-        return err;
-    }
-    gpio_init_callback(&int_cb, int_isr, BIT(int_gpio.pin));
-    err = gpio_add_callback_dt(&int_gpio, &int_cb);
-    if (err < 0) {
-        LOG_ERR("Error adding callback to INT. Error: %d", err);
-        return err;
-    }
-    return 0;
-}
+static uint32_t red_data[MAX_SAMPLES];
+static uint32_t ir_data[MAX_SAMPLES];
+static uint8_t counted_samples = 0;
 
 void hrm_ao_init(void) {
     LOG_INF("Initializing HRM AO.");
@@ -54,7 +27,6 @@ void hrm_ao_init(void) {
     ao_publish(&(const ao_event) { .id = HRM_INIT_EVT, .data = 1 });
 }
 
-
 void hrm_ao_dispatch(void *self, ao_event const *evt) {
     hrm_active_object *ao = (hrm_active_object *) self;
     int err = 0;
@@ -64,7 +36,6 @@ void hrm_ao_dispatch(void *self, ao_event const *evt) {
                 case HRM_INIT_EVT:
                     LOG_INF("Initializing HRM.");
                     max30102_init();
-                    // err = init_int_isr();
                     if (err < 0) {
                         LOG_ERR("Failed to initialize INT1");
                         return;
@@ -78,7 +49,12 @@ void hrm_ao_dispatch(void *self, ao_event const *evt) {
         case HRM_ACQUIRE:
             switch (evt->id) {
                 case HRM_DATA_READY:
-                    // TODO - add real data pass to BLE
+                    LOG_INF("DATA READY!");
+                    max30102_get_fifo(red_data, ir_data, &counted_samples);
+                    LOG_INF("Just read data. Samples counted: %d", counted_samples);
+                    for (int i = 0; i < counted_samples; ++i) {
+                        LOG_INF("FIFO Data. Red: %d, IR: %d, position %d", red_data[i], ir_data[i], i);
+                    }
                     break;
                 default:
                     break;
